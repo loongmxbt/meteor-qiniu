@@ -1,3 +1,5 @@
+var wrappedPutFile = Meteor.wrapAsync(qiniu.io.putFile, qiniu.io);
+
 Meteor.methods({
     qn_uptoken: function() {
         var bucket_name = QN.config.bucket_name;
@@ -19,25 +21,22 @@ Meteor.methods({
         })
     },
 
-    qn_upload: function(file, path, uptoken) {
+    qn_upload: function(file, path) {
         // check(file, Object);
 
         var extra = new qiniu.io.PutExtra();
+        var uptoken = Meteor.call('qn_uptoken');
         console.log("extra: " + extra);
         console.log("uptoken: " + uptoken);
 
+        // server side file is empty
         console.log("server file: ");
         console.log(file);
  
-        var key = path + file._id + file.name;
+        var key = path + "test";
         console.log("key: " + key);
+       
+        wrappedPutFile(uptoken, key, file, extra);
 
-        qiniu.io.putFile(uptoken, key, file, extra, function(err, ret) {
-            if (!err) {
-                console.log(ret.key, ret.hash);
-            } else {
-                console.log(err);
-            }
-        });
     }
 })
